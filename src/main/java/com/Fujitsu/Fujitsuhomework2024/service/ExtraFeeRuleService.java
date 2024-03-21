@@ -1,6 +1,7 @@
 package com.Fujitsu.Fujitsuhomework2024.service;
 
 import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
+import com.Fujitsu.Fujitsuhomework2024.repository.ExtraFeeRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

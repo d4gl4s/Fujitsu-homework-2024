@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 
@@ -18,23 +19,56 @@ public class ExtraFeeRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    @Column(nullable = false)
-    private String vehicleType;
+    @Column
+    @ElementCollection
+    private Set<String> vehicleType;
 
     @Column(nullable = false)
     private String condition; // e.g., temperature, wind speed, weather phenomenon
 
-    @Column(nullable = false)
-    private String conditionValue; // e.g., temperature range, wind speed range, weather phenomenon type
+    @Column
+    private Double minConditionValue; // for temperature & wind speed ranges
+
+    @Column
+    private Double maxConditionValue; // for temperature & wind speed ranges
+
+    @Column
+    @ElementCollection
+    private Set<String> weatherPhenomenonType; // for weather phenomenon (snow, sleet, rain)
 
     @Column(nullable = false)
     private double fee;
 
-    public ExtraFeeRule(String vehicleType, String condition, String conditionValue, double fee) {
+    @Column
+    private String errorMessage;
+
+    public ExtraFeeRule(Set<String> vehicleType, String condition, Set<String> weatherPhenomenonType, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;
-        this.conditionValue = conditionValue;
+        this.weatherPhenomenonType = weatherPhenomenonType;
         this.fee = fee;
+    }
+
+    public ExtraFeeRule(Set<String> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, double fee) {
+        this.vehicleType = vehicleType;
+        this.condition = condition;
+        this.minConditionValue = minConditionValue;
+        this.maxConditionValue = maxConditionValue;
+        this.fee = fee;
+    }
+
+    public ExtraFeeRule(Set<String> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, String errorMessage) {
+        this.vehicleType = vehicleType;
+        this.condition = condition;
+        this.minConditionValue = minConditionValue;
+        this.maxConditionValue = maxConditionValue;
+        this.errorMessage = errorMessage;
+    }
+
+    public ExtraFeeRule(Set<String> vehicleType, String condition, Set<String> weatherPhenomenonType, String errorMessage) {
+        this.vehicleType = vehicleType;
+        this.condition = condition;
+        this.weatherPhenomenonType = weatherPhenomenonType;
+        this.errorMessage = errorMessage;
     }
 }
