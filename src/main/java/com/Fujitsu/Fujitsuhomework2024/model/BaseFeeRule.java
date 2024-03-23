@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "base_fee_rules")
 @Data
@@ -24,10 +26,18 @@ public class BaseFeeRule {
     @Column(nullable = false)
     private double fee;
 
+    @Column(nullable = false)
+    private LocalDateTime startDate;
+
+    @Column
+    private LocalDateTime endDate;
+
+
     public BaseFeeRule(City city, VehicleType vehicleType, double fee) {
         this.city = city;
         this.vehicleType = vehicleType;
         this.fee = fee;
+        this.startDate = LocalDateTime.now();
     }
 }
 

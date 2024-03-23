@@ -1,5 +1,7 @@
 package com.Fujitsu.Fujitsuhomework2024.service;
 
+import com.Fujitsu.Fujitsuhomework2024.enums.City;
+import com.Fujitsu.Fujitsuhomework2024.enums.VehicleType;
 import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.repository.BaseFeeRuleRepository;
@@ -7,6 +9,8 @@ import com.Fujitsu.Fujitsuhomework2024.repository.ExtraFeeRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -69,5 +73,15 @@ public class RuleService {
             throw new RuntimeException("Extra fee rule not found with id: " + id);
         }
         extraFeeRuleRepository.deleteById(id);
+    }
+
+    public BaseFeeRule getBaseFeeRuleByCityAndVehicleTypeAndDateTime(City city, VehicleType vehicleType, LocalDateTime dateTime) {
+        BaseFeeRule baseFeeRule = baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
+        if (baseFeeRule == null) throw new IllegalArgumentException("No base fee found");
+        return baseFeeRule;
+    }
+
+    public List<ExtraFeeRule> findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType vehicleType, LocalDateTime dateTime) {
+        return extraFeeRuleRepository.findByDateTimeAndVehicleType(dateTime, vehicleType);
     }
 }

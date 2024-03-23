@@ -13,40 +13,38 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
 @AllArgsConstructor
 public class DeliveryFeeService {
-    private final WeatherRepository weatherRepository;
-    private final BaseFeeRuleRepository baseFeeRuleRepository;
+    private final WeatherService weatherService;
+    private final RuleService ruleService;
     private final ExtraFeeRuleRepository extraFeeRuleRepository;
-    private final Map<City, String> cityStationMap = new HashMap<>();
-    {
-        cityStationMap.put(City.TALLINN, "Tallinn-Harku");
-        cityStationMap.put(City.TARTU, "Tartu-Tõravere");
-        cityStationMap.put(City.PÄRNU, "Pärnu");
-    }
+
 
     public double calculateDeliveryFee(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         if (city == null || vehicleType == null)
             throw new IllegalArgumentException("City and vehicle type must not be null");
-        double baseFee = calculateBaseFee(city, vehicleType);
-        WeatherObservation latestWeatherObservation = weatherRepository.findFirstByStationNameOrderByTimestampDesc(cityStationMap.get(city));
-        double extraFee = calculateExtraFee(latestWeatherObservation, vehicleType);
+
+        if (dateTime != null && dateTime.isAfter(LocalDateTime.now()))
+            throw new IllegalArgumentException("Date cannot be in the future");
+
+        double baseFee = calculateBaseFee(city, vehicleType, dateTime);
+        WeatherObservation weatherObservation = weatherService.getWeatherAtDateTimeAtCity(dateTime, city);
+        double extraFee = calculateExtraFee(weatherObservation, vehicleType, dateTime);
         return baseFee + extraFee;
     }
-    private double calculateBaseFee(City city, VehicleType vehicleType) {
-        BaseFeeRule rule = baseFeeRuleRepository.findByCityAndVehicleType(city, vehicleType);
+    private double calculateBaseFee(City city, VehicleType vehicleType, LocalDateTime dateTime) {
+        BaseFeeRule rule = ruleService.getBaseFeeRuleByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
         if (rule == null) throw new IllegalArgumentException("No base fee found");
         return rule.getFee();
     }
-    private double calculateExtraFee(WeatherObservation weatherObservation, VehicleType vehicleType) {
+    private double calculateExtraFee(WeatherObservation weatherObservation, VehicleType vehicleType, LocalDateTime dateTime) {
         double totalExtraFee = 0.0;
-        List<ExtraFeeRule> extraFeeRules = extraFeeRuleRepository.findByVehicleType(vehicleType);
+        List<ExtraFeeRule> extraFeeRules = ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(vehicleType, dateTime);
+        //List<ExtraFeeRule> extraFeeRules = extraFeeRuleRepository.findByVehicleType(vehicleType);
         System.out.println(weatherObservation);
         for (ExtraFeeRule rule : extraFeeRules) {
             System.out.println(rule);

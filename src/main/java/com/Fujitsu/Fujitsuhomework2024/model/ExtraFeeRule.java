@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -45,6 +46,12 @@ public class ExtraFeeRule {
     @Column(nullable = false)
     private double fee;
 
+    @Column(nullable = false)
+    private LocalDateTime startDate;
+
+    @Column
+    private LocalDateTime endDate;
+
     public ExtraFeeRule(Set<VehicleType> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, boolean minIncludedInRange, boolean maxIncludedInRange, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;
@@ -53,6 +60,7 @@ public class ExtraFeeRule {
         this.minIncludedInRange = minIncludedInRange;
         this.maxIncludedInRange = maxIncludedInRange;
         this.fee = fee;
+        this.startDate = LocalDateTime.now();
     }
 
     public ExtraFeeRule(Set<VehicleType> vehicleType, String condition, Set<String> weatherPhenomenonType, double fee) {
@@ -60,5 +68,6 @@ public class ExtraFeeRule {
         this.condition = condition;
         this.weatherPhenomenonType = weatherPhenomenonType;
         this.fee = fee;
+        this.startDate = LocalDateTime.now();
     }
 }
