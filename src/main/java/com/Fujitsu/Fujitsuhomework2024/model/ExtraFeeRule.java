@@ -31,6 +31,11 @@ public class ExtraFeeRule {
 
     @Column
     private Double maxConditionValue; // for temperature & wind speed ranges
+    @Column
+    private boolean minIncludedInRange;
+
+    @Column
+    private boolean maxIncludedInRange;
 
     @Column
     @ElementCollection
@@ -39,36 +44,20 @@ public class ExtraFeeRule {
     @Column(nullable = false)
     private double fee;
 
-    @Column
-    private String errorMessage;
+    public ExtraFeeRule(Set<String> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, boolean minIncludedInRange, boolean maxIncludedInRange, double fee) {
+        this.vehicleType = vehicleType;
+        this.condition = condition;
+        this.minConditionValue = minConditionValue;
+        this.maxConditionValue = maxConditionValue;
+        this.minIncludedInRange = minIncludedInRange;
+        this.maxIncludedInRange = maxIncludedInRange;
+        this.fee = fee;
+    }
 
     public ExtraFeeRule(Set<String> vehicleType, String condition, Set<String> weatherPhenomenonType, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;
         this.weatherPhenomenonType = weatherPhenomenonType;
         this.fee = fee;
-    }
-
-    public ExtraFeeRule(Set<String> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, double fee) {
-        this.vehicleType = vehicleType;
-        this.condition = condition;
-        this.minConditionValue = minConditionValue;
-        this.maxConditionValue = maxConditionValue;
-        this.fee = fee;
-    }
-
-    public ExtraFeeRule(Set<String> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, String errorMessage) {
-        this.vehicleType = vehicleType;
-        this.condition = condition;
-        this.minConditionValue = minConditionValue;
-        this.maxConditionValue = maxConditionValue;
-        this.errorMessage = errorMessage;
-    }
-
-    public ExtraFeeRule(Set<String> vehicleType, String condition, Set<String> weatherPhenomenonType, String errorMessage) {
-        this.vehicleType = vehicleType;
-        this.condition = condition;
-        this.weatherPhenomenonType = weatherPhenomenonType;
-        this.errorMessage = errorMessage;
     }
 }

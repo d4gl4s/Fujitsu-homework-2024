@@ -1,6 +1,8 @@
 package com.Fujitsu.Fujitsuhomework2024.service;
 
+import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
+import com.Fujitsu.Fujitsuhomework2024.repository.BaseFeeRuleRepository;
 import com.Fujitsu.Fujitsuhomework2024.repository.ExtraFeeRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,10 +11,38 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ExtraFeeRuleService {
+public class RuleService {
 
+    private final BaseFeeRuleRepository baseFeeRuleRepository;
     private final ExtraFeeRuleRepository extraFeeRuleRepository;
 
+    public List<BaseFeeRule> getAllBaseFeeRules() {
+        return baseFeeRuleRepository.findAll();
+    }
+
+    public BaseFeeRule createBaseFeeRule(BaseFeeRule baseFeeRule) {
+        return baseFeeRuleRepository.save(baseFeeRule);
+    }
+
+    public BaseFeeRule getBaseFeeRuleById(Long id) {
+        return baseFeeRuleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Base fee rule not found with id: " + id));
+    }
+
+    public BaseFeeRule updateBaseFeeRule(Long id, BaseFeeRule baseFeeRule) {
+        if (!baseFeeRuleRepository.existsById(id)) {
+            throw new RuntimeException("Base fee rule not found with id: " + id);
+        }
+        baseFeeRule.setId(id); // Ensure the ID is set for update operation
+        return baseFeeRuleRepository.save(baseFeeRule);
+    }
+
+    public void deleteBaseFeeRule(Long id) {
+        if (!baseFeeRuleRepository.existsById(id)) {
+            throw new RuntimeException("Base fee rule not found with id: " + id);
+        }
+        baseFeeRuleRepository.deleteById(id);
+    }
     public List<ExtraFeeRule> getAllExtraFeeRules() {
         return extraFeeRuleRepository.findAll();
     }
@@ -41,4 +71,3 @@ public class ExtraFeeRuleService {
         extraFeeRuleRepository.deleteById(id);
     }
 }
-
