@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 public class CityEnumConverter implements Converter<String, City> {
     @Override
     public City convert(String source) {
-        System.out.println("here");
         return City.valueOf(source.toUpperCase());
     }
 }

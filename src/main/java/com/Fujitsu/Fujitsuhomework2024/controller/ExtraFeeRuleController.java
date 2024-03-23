@@ -1,6 +1,6 @@
 package com.Fujitsu.Fujitsuhomework2024.controller;
 
-import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
+/*import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;*/
 import com.Fujitsu.Fujitsuhomework2024.service.RuleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExtraFeeRuleController {
 
-    private final RuleService ruleService;
+   /* private final RuleService ruleService;
 
     @GetMapping
     public ResponseEntity<List<ExtraFeeRule>> getAllExtraFeeRules() {
@@ -44,5 +44,5 @@ public class ExtraFeeRuleController {
     public ResponseEntity<Void> deleteExtraFeeRule(@PathVariable Long id) {
         ruleService.deleteExtraFeeRule(id);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 }

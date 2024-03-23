@@ -1,5 +1,8 @@
 package com.Fujitsu.Fujitsuhomework2024.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import com.Fujitsu.Fujitsuhomework2024.enums.City;
 import com.Fujitsu.Fujitsuhomework2024.exception.WeatherObservationNotFoundException;
 import com.Fujitsu.Fujitsuhomework2024.model.Observations;
@@ -22,17 +25,16 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class WeatherService {
-
     private final WeatherRepository weatherRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private static final Map<City, String> cityStationMap = Map.of(
+    private static final Map<City, String> cityStationMap =  Map.of(
         City.TALLINN, "Tallinn-Harku",
         City.TARTU, "Tartu-Tõravere",
         City.PÄRNU, "Pärnu"
     );
 
     private static final String WEATHER_URL = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
-    private static final Set<String> OBSERVED_STATIONS = (Set<String>) cityStationMap.values();
+    private static final Set<String> OBSERVED_STATIONS = Set.of("Tallinn-Harku", "Tartu-Tõravere", "Pärnu");
     private static final String CRON_EXPRESSION_DEFAULT = "0 15 * * * *"; // Runs every hour at HH:15:00
 
     @Scheduled(cron = CRON_EXPRESSION_DEFAULT) // Runs every hour at HH:15:00 by default
@@ -60,13 +62,14 @@ public class WeatherService {
     }
 
     public WeatherObservation getWeatherAtDateTimeAtCity(LocalDateTime dateTime, City city) {
-        Optional<WeatherObservation> observation;
+        WeatherObservation observation;
 
         if (dateTime == null) // If dateTime is not provided, return the last observation
             observation = weatherRepository.findFirstByStationNameOrderByTimestampDesc(cityStationMap.get(city));
         else // If dateTime is provided, return the last observation before the given dateTime
             observation = weatherRepository.findFirstByStationNameAndTimestampBeforeOrderByTimestampDesc(cityStationMap.get(city), dateTime);
 
-        return observation.orElseThrow(WeatherObservationNotFoundException::new);
+        if(observation == null) throw new WeatherObservationNotFoundException();
+        return observation;
     }
 }

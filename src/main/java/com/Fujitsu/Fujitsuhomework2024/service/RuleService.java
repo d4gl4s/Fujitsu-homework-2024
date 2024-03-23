@@ -19,7 +19,6 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class RuleService {
-
     private final BaseFeeRuleRepository baseFeeRuleRepository;
     private final ExtraFeeRuleRepository extraFeeRuleRepository;
 
@@ -119,8 +118,11 @@ public class RuleService {
     // Other utility methods
 
     public BaseFeeRule getBaseFeeRuleByCityAndVehicleTypeAndDateTime(City city, VehicleType vehicleType, LocalDateTime dateTime) {
-        return baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime)
-                .orElseThrow(() -> new ResourceNotFoundException("No base fee found"));
+        BaseFeeRule bfr =  baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
+        if (bfr == null) {
+            throw new ResourceNotFoundException();
+        }
+        return bfr;
     }
 
     public List<ExtraFeeRule> findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType vehicleType, LocalDateTime dateTime) {

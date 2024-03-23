@@ -1,7 +1,7 @@
 package com.Fujitsu.Fujitsuhomework2024.controller;
 
-import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
-import com.Fujitsu.Fujitsuhomework2024.service.RuleService;
+/*import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
+import com.Fujitsu.Fujitsuhomework2024.service.RuleService;*/
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +13,7 @@ import java.util.List;
 @RequestMapping("/base-fees")
 @RequiredArgsConstructor
 public class BaseFeeRuleController {
-
-    private RuleService ruleService;
+/*    private RuleService ruleService;
 
     @GetMapping
     public ResponseEntity<List<BaseFeeRule>> getAllBaseFeeRules() {
@@ -44,5 +43,5 @@ public class BaseFeeRuleController {
     public ResponseEntity<Void> deleteBaseFeeRule(@PathVariable Long id) {
         ruleService.deleteBaseFeeRule(id);
         return ResponseEntity.noContent().build();
-    }
+    }*/
 }

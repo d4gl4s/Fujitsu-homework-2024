@@ -1,5 +1,7 @@
 package com.Fujitsu.Fujitsuhomework2024.service;
 
+
+
 import com.Fujitsu.Fujitsuhomework2024.enums.*;
 import com.Fujitsu.Fujitsuhomework2024.exception.ForbiddenVehicleTypeException;
 import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;

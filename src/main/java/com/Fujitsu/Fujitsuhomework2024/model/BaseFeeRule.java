@@ -3,6 +3,7 @@ package com.Fujitsu.Fujitsuhomework2024.model;
 import com.Fujitsu.Fujitsuhomework2024.enums.City;
 import com.Fujitsu.Fujitsuhomework2024.enums.VehicleType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
