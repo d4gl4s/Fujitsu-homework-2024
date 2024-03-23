@@ -118,11 +118,8 @@ public class RuleService {
     // Other utility methods
 
     public BaseFeeRule getBaseFeeRuleByCityAndVehicleTypeAndDateTime(City city, VehicleType vehicleType, LocalDateTime dateTime) {
-        BaseFeeRule bfr =  baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
-        if (bfr == null) {
-            throw new ResourceNotFoundException();
-        }
-        return bfr;
+        return baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime)
+                .orElseThrow(() -> new ResourceNotFoundException("Base fee not found for given city and vehicle type"));
     }
 
     public List<ExtraFeeRule> findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType vehicleType, LocalDateTime dateTime) {
