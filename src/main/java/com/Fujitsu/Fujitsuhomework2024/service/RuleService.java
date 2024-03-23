@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class RuleService {
     }
 
     public BaseFeeRule createBaseFeeRule(BaseFeeRule baseFeeRule) {
+        validateBaseFeeRule(baseFeeRule);
         return baseFeeRuleRepository.save(baseFeeRule);
     }
 
@@ -38,6 +40,7 @@ public class RuleService {
     }
 
     public BaseFeeRule updateBaseFeeRule(Long id, BaseFeeRule baseFeeRule) {
+        validateBaseFeeRule(baseFeeRule);
         BaseFeeRule existingRule = getBaseFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         baseFeeRuleRepository.save(existingRule);
@@ -58,6 +61,7 @@ public class RuleService {
     }
 
     public ExtraFeeRule createExtraFeeRule(ExtraFeeRule extraFeeRule) {
+        validateExtraFeeRule(extraFeeRule);
         return extraFeeRuleRepository.save(extraFeeRule);
     }
 
@@ -67,6 +71,7 @@ public class RuleService {
     }
 
     public ExtraFeeRule updateExtraFeeRule(Long id, ExtraFeeRule extraFeeRule) {
+        validateExtraFeeRule(extraFeeRule);
         ExtraFeeRule existingRule = getExtraFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         extraFeeRuleRepository.save(existingRule);
@@ -77,6 +82,38 @@ public class RuleService {
         ExtraFeeRule existingRule = getExtraFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         extraFeeRuleRepository.save(existingRule);
+    }
+
+    // Fee Rule Validation
+    private void validateBaseFeeRule(BaseFeeRule baseFeeRule) {
+        if(baseFeeRule.getCity() == null)
+            throw new IllegalArgumentException("Base Fee City value can not be null");
+
+        if(baseFeeRule.getVehicleType() == null)
+            throw new IllegalArgumentException("Base Fee Vehicle Type value can not be null");
+
+        if(baseFeeRule.getFee() <= 0)
+            throw new IllegalArgumentException("Base Fee value must be greater than 0");
+    }
+
+    private void validateExtraFeeRule(ExtraFeeRule extraFeeRule) {
+        Set<VehicleType> vehicleTypes = extraFeeRule.getVehicleType();
+        String condition = extraFeeRule.getCondition();
+        Double minValue = extraFeeRule.getMinConditionValue();
+        Double maxValue = extraFeeRule.getMaxConditionValue();
+        Set<String> weatherPhenomenons = extraFeeRule.getWeatherPhenomenonType();
+
+        if(vehicleTypes == null || vehicleTypes.isEmpty())
+            throw new IllegalArgumentException("Vehicle types must be specified for extra fee rules");
+
+        if(condition == null || condition.isEmpty())
+            throw new IllegalArgumentException("Condition can not be empty for extra fee rules");
+
+        if(!minValue.isNaN() && !maxValue.isNaN() && minValue >= maxValue)
+            throw new IllegalArgumentException("Min value must be smaller than max value");
+
+        if(weatherPhenomenons != null && weatherPhenomenons.isEmpty())
+            throw new IllegalArgumentException("Weather phenomenons list can not be empty for extra fee rules");
     }
 
     // Other utility methods

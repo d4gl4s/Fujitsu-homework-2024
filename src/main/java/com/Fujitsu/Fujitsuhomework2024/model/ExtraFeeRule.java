@@ -21,7 +21,7 @@ public class ExtraFeeRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
+    @Column(nullable = false)
     @ElementCollection
     private Set<VehicleType> vehicleType;
 
