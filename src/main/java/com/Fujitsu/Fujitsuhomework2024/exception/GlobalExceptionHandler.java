@@ -11,6 +11,11 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ForbiddenVehicleTypeException.class)
+    public ResponseEntity<String> handleForbiddenVehicleType(ForbiddenVehicleTypeException ex) {
+        return ResponseEntity.badRequest().body("Usage of selected vehicle type is forbidden");
+    }
+
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
         return ResponseEntity.badRequest().body("Missing Request Parameters: " + ex.getMessage());

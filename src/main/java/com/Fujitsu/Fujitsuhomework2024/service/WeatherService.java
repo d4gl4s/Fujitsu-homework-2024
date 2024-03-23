@@ -3,6 +3,7 @@ package com.Fujitsu.Fujitsuhomework2024.service;
 import com.Fujitsu.Fujitsuhomework2024.model.Observations;
 import com.Fujitsu.Fujitsuhomework2024.model.WeatherObservation;
 import com.Fujitsu.Fujitsuhomework2024.repository.WeatherRepository;
+import com.Fujitsu.Fujitsuhomework2024.util.UnixTimeToLocalDateTimeConverter;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,9 +40,8 @@ public class WeatherService {
         try {
             XmlMapper xmlMapper = new XmlMapper();
             Observations weatherList = xmlMapper.readValue(xmlData, Observations.class);
-
             for (WeatherObservation weatherObservation : weatherList.getStations()) {
-                if(OBSERVED_STATIONS.contains(weatherObservation.getStationName())) saveWeatherData(weatherObservation);
+                if(OBSERVED_STATIONS.contains(weatherObservation.getStationName())) saveWeatherData(weatherObservation, weatherList.getTimestamp());
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -50,9 +50,10 @@ public class WeatherService {
     }
 
 
-    private void saveWeatherData(WeatherObservation weatherObservation) {
+    private void saveWeatherData(WeatherObservation weatherObservation, long timestampUnix) {
         try {
-            weatherObservation.setTimestamp(LocalDateTime.now());
+            LocalDateTime timestamp = UnixTimeToLocalDateTimeConverter.convertUnixTimestamp(timestampUnix);
+            weatherObservation.setTimestamp(timestamp);
             weatherRepository.save(weatherObservation);
         } catch (Exception e) {
             System.out.println("Error while saving weather data.");

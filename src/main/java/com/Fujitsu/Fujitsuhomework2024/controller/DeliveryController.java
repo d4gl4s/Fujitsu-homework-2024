@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @RestController
 @AllArgsConstructor
 public class DeliveryController {
@@ -18,11 +20,10 @@ public class DeliveryController {
     @GetMapping("/calculateDeliveryFee")
     public ResponseEntity<Double> calculateDeliveryFee(
             @RequestParam City city,
-            @RequestParam VehicleType vehicleType
+            @RequestParam VehicleType vehicleType,
+            @RequestParam(required = false) LocalDateTime dateTime
     ) {
-        String city2 = "Tallinn";
-        String type = "car";
-        double deliveryFee = deliveryService.calculateDeliveryFee(city2, type);
+        double deliveryFee = deliveryService.calculateDeliveryFee(city, vehicleType, dateTime);
         return ResponseEntity.ok(deliveryFee);
     }
 }

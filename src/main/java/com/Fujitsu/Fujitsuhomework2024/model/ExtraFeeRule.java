@@ -1,5 +1,6 @@
 package com.Fujitsu.Fujitsuhomework2024.model;
 
+import com.Fujitsu.Fujitsuhomework2024.enums.VehicleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class ExtraFeeRule {
 
     @Column
     @ElementCollection
-    private Set<String> vehicleType;
+    private Set<VehicleType> vehicleType;
 
     @Column(nullable = false)
     private String condition; // e.g., temperature, wind speed, weather phenomenon
@@ -44,7 +45,7 @@ public class ExtraFeeRule {
     @Column(nullable = false)
     private double fee;
 
-    public ExtraFeeRule(Set<String> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, boolean minIncludedInRange, boolean maxIncludedInRange, double fee) {
+    public ExtraFeeRule(Set<VehicleType> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, boolean minIncludedInRange, boolean maxIncludedInRange, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;
         this.minConditionValue = minConditionValue;
@@ -54,7 +55,7 @@ public class ExtraFeeRule {
         this.fee = fee;
     }
 
-    public ExtraFeeRule(Set<String> vehicleType, String condition, Set<String> weatherPhenomenonType, double fee) {
+    public ExtraFeeRule(Set<VehicleType> vehicleType, String condition, Set<String> weatherPhenomenonType, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;
         this.weatherPhenomenonType = weatherPhenomenonType;
