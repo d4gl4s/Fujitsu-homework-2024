@@ -8,12 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public interface BaseFeeRuleRepository extends JpaRepository<BaseFeeRule, Long> {
     @Query("SELECT bfr FROM BaseFeeRule bfr WHERE bfr.city = :city AND bfr.vehicleType = :vehicleType " +
             "AND (:dateTime IS NULL OR (:dateTime BETWEEN bfr.startDate AND COALESCE(bfr.endDate, :dateTime)))")
-    BaseFeeRule findByCityAndVehicleTypeAndDateTime(@Param("city") City city,
-                                                     @Param("vehicleType") VehicleType vehicleType,
-                                                     @Param("dateTime") LocalDateTime dateTime);
+    Optional<BaseFeeRule> findByCityAndVehicleTypeAndDateTime(@Param("city") City city,
+                                                              @Param("vehicleType") VehicleType vehicleType,
+                                                              @Param("dateTime") LocalDateTime dateTime);
 }
 

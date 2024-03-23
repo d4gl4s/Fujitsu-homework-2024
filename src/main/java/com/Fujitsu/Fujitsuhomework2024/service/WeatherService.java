@@ -25,15 +25,14 @@ public class WeatherService {
 
     private final WeatherRepository weatherRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final Map<City, String> cityStationMap = new HashMap<>();
-    {
-        cityStationMap.put(City.TALLINN, "Tallinn-Harku");
-        cityStationMap.put(City.TARTU, "Tartu-Tõravere");
-        cityStationMap.put(City.PÄRNU, "Pärnu");
-    }
+    private static final Map<City, String> cityStationMap = Map.of(
+        City.TALLINN, "Tallinn-Harku",
+        City.TARTU, "Tartu-Tõravere",
+        City.PÄRNU, "Pärnu"
+    );
 
     private static final String WEATHER_URL = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
-    private static final Set<String> OBSERVED_STATIONS = Set.of("Tallinn-Harku", "Tartu-Tõravere", "Pärnu");
+    private static final Set<String> OBSERVED_STATIONS = (Set<String>) cityStationMap.values();
     private static final String CRON_EXPRESSION_DEFAULT = "0 15 * * * *"; // Runs every hour at HH:15:00
 
     @Scheduled(cron = CRON_EXPRESSION_DEFAULT) // Runs every hour at HH:15:00 by default
@@ -42,44 +41,32 @@ public class WeatherService {
             String xmlData = restTemplate.getForObject(WEATHER_URL, String.class);
             parseAndInsertWeatherData(xmlData);
         } catch (Exception e) {
-            System.out.println("Error importing weather data");
+           throw new RuntimeException("Error importing weather data");
         }
     }
 
-    private void parseAndInsertWeatherData(String xmlData) {
-        try {
-            XmlMapper xmlMapper = new XmlMapper();
-            Observations weatherList = xmlMapper.readValue(xmlData, Observations.class);
-            for (WeatherObservation weatherObservation : weatherList.getStations()) {
-                if(OBSERVED_STATIONS.contains(weatherObservation.getStationName())) saveWeatherData(weatherObservation, weatherList.getTimestamp());
-            }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-        }
+    private void parseAndInsertWeatherData(String xmlData) throws IOException {
+        XmlMapper xmlMapper = new XmlMapper();
+        Observations weatherList = xmlMapper.readValue(xmlData, Observations.class);
+        for (WeatherObservation weatherObservation : weatherList.getStations()) {
+            if(OBSERVED_STATIONS.contains(weatherObservation.getStationName())) saveWeatherData(weatherObservation, weatherList.getTimestamp());}
     }
 
 
     private void saveWeatherData(WeatherObservation weatherObservation, long timestampUnix) {
-        try {
-            LocalDateTime timestamp = UnixTimeToLocalDateTimeConverter.convertUnixTimestamp(timestampUnix);
-            weatherObservation.setTimestamp(timestamp);
-            weatherRepository.save(weatherObservation);
-        } catch (Exception e) {
-            System.out.println("Error while saving weather data.");
-        }
+        LocalDateTime timestamp = UnixTimeToLocalDateTimeConverter.convertUnixTimestamp(timestampUnix);
+        weatherObservation.setTimestamp(timestamp);
+        weatherRepository.save(weatherObservation);
     }
 
     public WeatherObservation getWeatherAtDateTimeAtCity(LocalDateTime dateTime, City city) {
-        WeatherObservation observation;
+        Optional<WeatherObservation> observation;
 
-        if (dateTime == null)
-            // If dateTime is not provided, return the last observation
+        if (dateTime == null) // If dateTime is not provided, return the last observation
             observation = weatherRepository.findFirstByStationNameOrderByTimestampDesc(cityStationMap.get(city));
-        else
-            // If dateTime is provided, return the last observation before the given dateTime
+        else // If dateTime is provided, return the last observation before the given dateTime
             observation = weatherRepository.findFirstByStationNameAndTimestampBeforeOrderByTimestampDesc(cityStationMap.get(city), dateTime);
 
-        if(observation == null) throw new WeatherObservationNotFoundException();
-        return observation;
+        return observation.orElseThrow(WeatherObservationNotFoundException::new);
     }
 }

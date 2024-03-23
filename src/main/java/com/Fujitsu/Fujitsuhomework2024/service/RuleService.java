@@ -2,6 +2,7 @@ package com.Fujitsu.Fujitsuhomework2024.service;
 
 import com.Fujitsu.Fujitsuhomework2024.enums.City;
 import com.Fujitsu.Fujitsuhomework2024.enums.VehicleType;
+import com.Fujitsu.Fujitsuhomework2024.exception.ResourceNotFoundException;
 import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.repository.BaseFeeRuleRepository;
@@ -21,6 +22,8 @@ public class RuleService {
     private final BaseFeeRuleRepository baseFeeRuleRepository;
     private final ExtraFeeRuleRepository extraFeeRuleRepository;
 
+    // Base Fee Rule CRUD operations
+
     public List<BaseFeeRule> getAllBaseFeeRules() {
         return baseFeeRuleRepository.findAll();
     }
@@ -31,33 +34,25 @@ public class RuleService {
 
     public BaseFeeRule getBaseFeeRuleById(Long id) {
         return baseFeeRuleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Base fee rule not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Base fee rule not found with id: " + id));
     }
 
     public BaseFeeRule updateBaseFeeRule(Long id, BaseFeeRule baseFeeRule) {
-        BaseFeeRule existingRule = baseFeeRuleRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Base fee rule not found with id: " + id));
-
-        // Update the end date of the existing rule to current date
+        BaseFeeRule existingRule = getBaseFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         baseFeeRuleRepository.save(existingRule);
-
-        // Create a new rule with modifications and save it
-        BaseFeeRule newRuleCopy = new BaseFeeRule(
-                baseFeeRule.getCity(),
-                baseFeeRule.getVehicleType(),
-                baseFeeRule.getFee());
-        return baseFeeRuleRepository.save(newRuleCopy);
+        baseFeeRule.setId(null); // Clear ID to create a new entry
+        return baseFeeRuleRepository.save(baseFeeRule);
     }
 
     public void deleteBaseFeeRule(Long id) {
-        BaseFeeRule existingRule = baseFeeRuleRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Base fee rule not found with id: " + id));
-
-        // Update the end date of the rule to current date, but keep it in database
+        BaseFeeRule existingRule = getBaseFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         baseFeeRuleRepository.save(existingRule);
     }
+
+    // Extra Fee Rule CRUD operations
+
     public List<ExtraFeeRule> getAllExtraFeeRules() {
         return extraFeeRuleRepository.findAll();
     }
@@ -68,46 +63,27 @@ public class RuleService {
 
     public ExtraFeeRule getExtraFeeRuleById(Long id) {
         return extraFeeRuleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Extra fee rule not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Extra fee rule not found with id: " + id));
     }
 
     public ExtraFeeRule updateExtraFeeRule(Long id, ExtraFeeRule extraFeeRule) {
-        ExtraFeeRule existingRule = extraFeeRuleRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Extra fee rule not found with id: " + id));
-
-        // Update the end date of the existing rule to current date
+        ExtraFeeRule existingRule = getExtraFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         extraFeeRuleRepository.save(existingRule);
-
-        // Create a new rule with modifications and save it
-        ExtraFeeRule newRuleCopy = new ExtraFeeRule();
-        newRuleCopy.setCondition(extraFeeRule.getCondition());
-        newRuleCopy.setVehicleType(extraFeeRule.getVehicleType());
-        newRuleCopy.setFee(extraFeeRule.getFee());
-        if(existingRule.getCondition().equals("weather phenomenon")){
-            newRuleCopy.setWeatherPhenomenonType(extraFeeRule.getWeatherPhenomenonType());
-            return newRuleCopy;
-        }
-        newRuleCopy.setMaxConditionValue(extraFeeRule.getMaxConditionValue());
-        newRuleCopy.setMinConditionValue(extraFeeRule.getMinConditionValue());
-        newRuleCopy.setMaxIncludedInRange(extraFeeRule.isMaxIncludedInRange());
-        newRuleCopy.setMinIncludedInRange(extraFeeRule.isMinIncludedInRange());
-        return extraFeeRuleRepository.save(newRuleCopy);
+        return extraFeeRuleRepository.save(extraFeeRule);
     }
 
     public void deleteExtraFeeRule(Long id) {
-        ExtraFeeRule existingRule = extraFeeRuleRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Extra fee rule not found with id: " + id));
-
-        // Update the end date of the existing rule to current date
+        ExtraFeeRule existingRule = getExtraFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         extraFeeRuleRepository.save(existingRule);
     }
 
+    // Other utility methods
+
     public BaseFeeRule getBaseFeeRuleByCityAndVehicleTypeAndDateTime(City city, VehicleType vehicleType, LocalDateTime dateTime) {
-        BaseFeeRule baseFeeRule = baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
-        if (baseFeeRule == null) throw new IllegalArgumentException("No base fee found");
-        return baseFeeRule;
+        return baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime)
+                .orElseThrow(() -> new ResourceNotFoundException("No base fee found"));
     }
 
     public List<ExtraFeeRule> findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType vehicleType, LocalDateTime dateTime) {

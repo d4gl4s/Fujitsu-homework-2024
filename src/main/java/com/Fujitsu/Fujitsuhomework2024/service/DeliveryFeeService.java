@@ -1,17 +1,12 @@
 package com.Fujitsu.Fujitsuhomework2024.service;
 
-import com.Fujitsu.Fujitsuhomework2024.enums.City;
-import com.Fujitsu.Fujitsuhomework2024.enums.VehicleType;
+import com.Fujitsu.Fujitsuhomework2024.enums.*;
 import com.Fujitsu.Fujitsuhomework2024.exception.ForbiddenVehicleTypeException;
 import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.WeatherObservation;
-import com.Fujitsu.Fujitsuhomework2024.repository.BaseFeeRuleRepository;
-import com.Fujitsu.Fujitsuhomework2024.repository.ExtraFeeRuleRepository;
-import com.Fujitsu.Fujitsuhomework2024.repository.WeatherRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -21,8 +16,6 @@ import java.util.Set;
 public class DeliveryFeeService {
     private final WeatherService weatherService;
     private final RuleService ruleService;
-    private final ExtraFeeRuleRepository extraFeeRuleRepository;
-
 
     public double calculateDeliveryFee(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         if (city == null || vehicleType == null)
@@ -42,16 +35,10 @@ public class DeliveryFeeService {
         return rule.getFee();
     }
     private double calculateExtraFee(WeatherObservation weatherObservation, VehicleType vehicleType, LocalDateTime dateTime) {
-        double totalExtraFee = 0.0;
-        List<ExtraFeeRule> extraFeeRules = ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(vehicleType, dateTime);
-        //List<ExtraFeeRule> extraFeeRules = extraFeeRuleRepository.findByVehicleType(vehicleType);
-        System.out.println(weatherObservation);
-        for (ExtraFeeRule rule : extraFeeRules) {
-            System.out.println(rule);
-            totalExtraFee += applyRule(rule, weatherObservation);
-        }
-        System.out.println("Extra fee = " + totalExtraFee);
-        return totalExtraFee;
+        return ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(vehicleType, dateTime)
+                .stream()
+                .mapToDouble(rule -> applyRule(rule, weatherObservation))
+                .sum();
     }
 
     private double applyRule(ExtraFeeRule rule, WeatherObservation weatherObservation) {

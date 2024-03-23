@@ -11,6 +11,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
