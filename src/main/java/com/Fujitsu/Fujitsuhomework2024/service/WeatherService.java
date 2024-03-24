@@ -65,7 +65,15 @@ public class WeatherService {
         weatherRepository.save(weatherObservation);
     }
 
-    // Retrieves weather observation for a specific city at a given date and time.
+
+    /**
+     * Retrieves the weather observation for a specific city at a given date and time.
+     *
+     * @param dateTime The date and time for which to retrieve the weather observation.
+     * @param city     The city for which to retrieve the weather observation.
+     * @return The weather observation for the specified city at the given date and time.
+     * @throws ResourceNotFoundException if no weather observation is found for the given city and time.
+     */
     public WeatherObservation getWeatherAtDateTimeAtCity(LocalDateTime dateTime, City city) {
         Optional<WeatherObservation> observation;
 
@@ -76,5 +84,4 @@ public class WeatherService {
 
         return observation.orElseThrow(() -> new ResourceNotFoundException("Weather not found for given station"));
     }
-
 }

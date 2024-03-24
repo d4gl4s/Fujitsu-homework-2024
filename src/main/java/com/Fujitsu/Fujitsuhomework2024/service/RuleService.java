@@ -87,20 +87,46 @@ public class RuleService {
 
     // Extra Fee Rule CRUD operations
 
+    /**
+     * Retrieves all extra fee rules.
+     *
+     * @return List of all extra fee rules.
+     */
     public List<ExtraFeeRule> getAllExtraFeeRules() {
         return extraFeeRuleRepository.findAll();
     }
 
+    /**
+     * Creates a new extra fee rule.
+     *
+     * @param extraFeeRule The extra fee rule to create.
+     * @return The created extra fee rule.
+     */
     public ExtraFeeRule createExtraFeeRule(ExtraFeeRule extraFeeRule) {
         validateExtraFeeRule(extraFeeRule);
         return extraFeeRuleRepository.save(extraFeeRule);
     }
 
+    /**
+     * Retrieves an extra fee rule by its ID.
+     *
+     * @param id The ID of the extra fee rule to retrieve.
+     * @return The extra fee rule with the specified ID.
+     * @throws ResourceNotFoundException if no extra fee rule is found with the given ID.
+     */
     public ExtraFeeRule getExtraFeeRuleById(Long id) {
         return extraFeeRuleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Extra fee rule not found with id: " + id));
     }
 
+    /**
+     * Updates an existing extra fee rule.
+     *
+     * @param id           The ID of the extra fee rule to update.
+     * @param extraFeeRule The updated extra fee rule.
+     * @return The updated extra fee rule.
+     * @throws ResourceNotFoundException if no extra fee rule is found with the given ID.
+     */
     public ExtraFeeRule updateExtraFeeRule(Long id, ExtraFeeRule extraFeeRule) {
         validateExtraFeeRule(extraFeeRule);
         ExtraFeeRule existingRule = getExtraFeeRuleById(id);
@@ -109,11 +135,18 @@ public class RuleService {
         return extraFeeRuleRepository.save(extraFeeRule);
     }
 
+    /**
+     * Deletes an extra fee rule by its ID.
+     *
+     * @param id The ID of the extra fee rule to delete.
+     * @throws ResourceNotFoundException if no extra fee rule is found with the given ID.
+     */
     public void deleteExtraFeeRule(Long id) {
         ExtraFeeRule existingRule = getExtraFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
         extraFeeRuleRepository.save(existingRule);
     }
+
 
     // Fee Rule Validation
 
@@ -151,13 +184,31 @@ public class RuleService {
     }
 
     // Other utility methods
+
+    /**
+     * Retrieves the base fee rule for a given city, vehicle type, and date/time.
+     *
+     * @param city        The city for which to retrieve the base fee rule.
+     * @param vehicleType The type of vehicle for which to retrieve the base fee rule.
+     * @param dateTime    The date/time for which to retrieve the base fee rule.
+     * @return The base fee rule for the specified city, vehicle type, and date/time.
+     * @throws ResourceNotFoundException if no base fee rule is found for the given city and vehicle type.
+     */
     public BaseFeeRule getBaseFeeRuleByCityAndVehicleTypeAndDateTime(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         return baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime)
                 .orElseThrow(() -> new ResourceNotFoundException("Base fee not found for given city and vehicle type"));
     }
 
+    /**
+     * Retrieves a list of extra fee rules for a given vehicle type and date/time.
+     *
+     * @param vehicleType The type of vehicle for which to retrieve extra fee rules.
+     * @param dateTime    The date/time for which to retrieve extra fee rules.
+     * @return A list of extra fee rules for the specified vehicle type and date/time.
+     */
     public List<ExtraFeeRule> findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType vehicleType, LocalDateTime dateTime) {
         return extraFeeRuleRepository.findByDateTimeAndVehicleType(dateTime, vehicleType);
     }
+
 
 }
