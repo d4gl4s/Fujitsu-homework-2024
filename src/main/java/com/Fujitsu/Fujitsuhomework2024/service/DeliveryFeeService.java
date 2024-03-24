@@ -10,7 +10,6 @@ import com.Fujitsu.Fujitsuhomework2024.model.WeatherObservation;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -33,7 +32,6 @@ public class DeliveryFeeService {
     }
     private double calculateBaseFee(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         BaseFeeRule rule = ruleService.getBaseFeeRuleByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
-        if (rule == null) throw new IllegalArgumentException("No base fee found");
         return rule.getFee();
     }
     private double calculateExtraFee(WeatherObservation weatherObservation, VehicleType vehicleType, LocalDateTime dateTime) {

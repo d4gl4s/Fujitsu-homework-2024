@@ -22,7 +22,7 @@ public class ExtraFeeRule {
     private Long id;
 
     @Column
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<VehicleType> vehicleType;
 
     @Column(nullable = false)
@@ -40,7 +40,7 @@ public class ExtraFeeRule {
     private boolean maxIncludedInRange;
 
     @Column
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> weatherPhenomenonType; // for weather phenomenon (snow, sleet, rain)
 
     @Column(nullable = false)
