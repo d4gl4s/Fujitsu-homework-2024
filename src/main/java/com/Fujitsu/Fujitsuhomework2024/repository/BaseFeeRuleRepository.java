@@ -24,8 +24,11 @@ public interface BaseFeeRuleRepository extends JpaRepository<BaseFeeRule, Long> 
      * @return An {@link Optional} containing the {@link BaseFeeRule} for the specified city, vehicle type,
      *         and date/time, or empty if no rule is found.
      */
-    @Query("SELECT bfr FROM BaseFeeRule bfr WHERE bfr.city = :city AND bfr.vehicleType = :vehicleType " +
-            "AND (:dateTime IS NULL OR (:dateTime BETWEEN bfr.startDate AND COALESCE(bfr.endDate, :dateTime)))")
+    @Query("SELECT bfr FROM BaseFeeRule bfr " +
+       "WHERE bfr.city = :city AND bfr.vehicleType = :vehicleType " +
+       "AND (:dateTime IS NULL OR (:dateTime BETWEEN bfr.startDate AND COALESCE(bfr.endDate, :dateTime))) " +
+       "ORDER BY bfr.startDate DESC " +
+       "LIMIT 1")
     Optional<BaseFeeRule> findByCityAndVehicleTypeAndDateTime(@Param("city") City city,
                                                               @Param("vehicleType") VehicleType vehicleType,
                                                               @Param("dateTime") LocalDateTime dateTime);
