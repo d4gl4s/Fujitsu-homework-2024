@@ -31,7 +31,7 @@ public class BaseFeeRule {
     private LocalDateTime startDate;
 
     @Column
-    private LocalDateTime endDate;
+    private LocalDateTime endDate; // End date is specified if it does not apply currently. If rule is in use at the present moment, endDate will be null
 
 
     public BaseFeeRule(City city, VehicleType vehicleType, double fee) {

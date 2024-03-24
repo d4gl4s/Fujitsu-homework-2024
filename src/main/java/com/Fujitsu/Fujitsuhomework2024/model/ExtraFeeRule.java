@@ -50,8 +50,19 @@ public class ExtraFeeRule {
     private LocalDateTime startDate;
 
     @Column
-    private LocalDateTime endDate;
+    private LocalDateTime endDate;  // End date is specified if it does not apply currently. If rule is in use at the present moment, endDate will be null
 
+    /**
+    * Constructs an {@code ExtraFeeRule} object with the specified parameters.
+    *
+    * @param vehicleType           The set of vehicle types to which this rule applies.
+    * @param condition             The condition under which this rule applies.
+    * @param minConditionValue     The minimum value of the condition.
+    * @param maxConditionValue     The maximum value of the condition.
+    * @param minIncludedInRange    {@code true} if the minimum value is included in the range, {@code false} otherwise.
+    * @param maxIncludedInRange    {@code true} if the maximum value is included in the range, {@code false} otherwise.
+    * @param fee                   The fee associated with this rule.
+    */
     public ExtraFeeRule(Set<VehicleType> vehicleType, String condition, Double minConditionValue, Double maxConditionValue, boolean minIncludedInRange, boolean maxIncludedInRange, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;
@@ -63,6 +74,14 @@ public class ExtraFeeRule {
         this.startDate = LocalDateTime.now();
     }
 
+    /**
+    * Constructs an {@code ExtraFeeRule} object with the specified parameters.
+    *
+    * @param vehicleType           The set of vehicle types to which this rule applies.
+    * @param condition             The condition under which this rule applies.
+    * @param weatherPhenomenonType The set of weather phenomenon types to which this rule applies.
+    * @param fee                   The fee associated with this rule.
+    */
     public ExtraFeeRule(Set<VehicleType> vehicleType, String condition, Set<String> weatherPhenomenonType, double fee) {
         this.vehicleType = vehicleType;
         this.condition = condition;

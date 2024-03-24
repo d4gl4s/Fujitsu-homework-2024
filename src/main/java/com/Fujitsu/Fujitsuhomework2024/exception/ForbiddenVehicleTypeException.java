@@ -7,7 +7,5 @@ public class ForbiddenVehicleTypeException extends RuntimeException{
     private final String message;
 
     @Override
-    public String getMessage() {
-        return message;
-    }
+    public String getMessage() {return message;}
 }

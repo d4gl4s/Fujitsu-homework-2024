@@ -16,7 +16,16 @@ import java.time.LocalDateTime;
 public class DeliveryController {
     private final DeliveryFeeService deliveryService;
 
-    @GetMapping("/calculateDeliveryFee")
+
+    /**
+     * Calculates the delivery fee based on the given city, vehicle type, and optional date and time.
+     *
+     * @param city       The city where the delivery is to be made.
+     * @param vehicleType The type of vehicle to be used for the delivery.
+     * @param dateTime   The date and time of the delivery (optional).
+     * @return A {@link ResponseEntity} containing the calculated delivery fee as a {@link Double} or an error in case of failure.
+     */
+    @GetMapping("/api/calculateDeliveryFee")
     public ResponseEntity<Double> calculateDeliveryFee(
             @RequestParam City city,
             @RequestParam VehicleType vehicleType,
@@ -25,4 +34,5 @@ public class DeliveryController {
         double deliveryFee = deliveryService.calculateDeliveryFee(city, vehicleType, dateTime);
         return ResponseEntity.ok(deliveryFee);
     }
+
 }

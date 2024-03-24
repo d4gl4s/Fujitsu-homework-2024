@@ -24,20 +24,46 @@ public class RuleService {
 
     // Base Fee Rule CRUD operations
 
+    /**
+     * Retrieves all base fee rules.
+     *
+     * @return A list of all base fee rules.
+     */
     public List<BaseFeeRule> getAllBaseFeeRules() {
         return baseFeeRuleRepository.findAll();
     }
 
+    /**
+     * Creates a new base fee rule.
+     *
+     * @param baseFeeRule The base fee rule to be created.
+     * @return The created base fee rule.
+     */
     public BaseFeeRule createBaseFeeRule(BaseFeeRule baseFeeRule) {
         validateBaseFeeRule(baseFeeRule);
         return baseFeeRuleRepository.save(baseFeeRule);
     }
 
+    /**
+     * Retrieves a base fee rule by its ID.
+     *
+     * @param id The ID of the base fee rule to retrieve.
+     * @return The base fee rule with the specified ID.
+     * @throws ResourceNotFoundException if no base fee rule is found with the given ID.
+     */
     public BaseFeeRule getBaseFeeRuleById(Long id) {
         return baseFeeRuleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Base fee rule not found with id: " + id));
     }
 
+    /**
+     * Updates an existing base fee rule.
+     *
+     * @param id          The ID of the base fee rule to update.
+     * @param baseFeeRule The updated base fee rule.
+     * @return The updated base fee rule.
+     * @throws ResourceNotFoundException if no base fee rule is found with the given ID.
+     */
     public BaseFeeRule updateBaseFeeRule(Long id, BaseFeeRule baseFeeRule) {
         validateBaseFeeRule(baseFeeRule);
         BaseFeeRule existingRule = getBaseFeeRuleById(id);
@@ -47,6 +73,12 @@ public class RuleService {
         return baseFeeRuleRepository.save(baseFeeRule);
     }
 
+    /**
+     * Deletes a base fee rule by its ID.
+     *
+     * @param id The ID of the base fee rule to delete.
+     * @throws ResourceNotFoundException if no base fee rule is found with the given ID.
+     */
     public void deleteBaseFeeRule(Long id) {
         BaseFeeRule existingRule = getBaseFeeRuleById(id);
         existingRule.setEndDate(LocalDateTime.now());
@@ -84,6 +116,8 @@ public class RuleService {
     }
 
     // Fee Rule Validation
+
+    // Validates base fee rule data
     private void validateBaseFeeRule(BaseFeeRule baseFeeRule) {
         if(baseFeeRule.getCity() == null)
             throw new IllegalArgumentException("Base Fee City value can not be null");
@@ -95,6 +129,7 @@ public class RuleService {
             throw new IllegalArgumentException("Base Fee value must be greater than 0");
     }
 
+    // Validates extra fee rule data
     private void validateExtraFeeRule(ExtraFeeRule extraFeeRule) {
         Set<VehicleType> vehicleTypes = extraFeeRule.getVehicleType();
         String condition = extraFeeRule.getCondition();
@@ -116,7 +151,6 @@ public class RuleService {
     }
 
     // Other utility methods
-
     public BaseFeeRule getBaseFeeRuleByCityAndVehicleTypeAndDateTime(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         return baseFeeRuleRepository.findByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime)
                 .orElseThrow(() -> new ResourceNotFoundException("Base fee not found for given city and vehicle type"));
@@ -125,4 +159,5 @@ public class RuleService {
     public List<ExtraFeeRule> findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType vehicleType, LocalDateTime dateTime) {
         return extraFeeRuleRepository.findByDateTimeAndVehicleType(dateTime, vehicleType);
     }
+
 }

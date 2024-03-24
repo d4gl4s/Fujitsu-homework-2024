@@ -18,6 +18,16 @@ public class DeliveryFeeService {
     private final WeatherService weatherService;
     private final RuleService ruleService;
 
+    /**
+     * Calculates the delivery fee based on the specified city and vehicle type.
+     * If dateTime is provided returns fee that would have been calculated with rules that were present during that time period
+     *
+     * @param city       The city where the delivery is to be made.
+     * @param vehicleType The type of vehicle to be used for the delivery.
+     * @param dateTime   The date and time of the delivery.
+     * @return The calculated delivery fee.
+     * @throws IllegalArgumentException if the city or vehicle type is null, or if the date/time is in the future.
+     */
     public double calculateDeliveryFee(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         if (city == null || vehicleType == null)
             throw new IllegalArgumentException("City and vehicle type must not be null");
@@ -30,10 +40,15 @@ public class DeliveryFeeService {
         double extraFee = calculateExtraFee(weatherObservation, vehicleType, dateTime);
         return baseFee + extraFee;
     }
+
+
+    // Calculates the base fee for a given city, vehicle type, and date/time.
     private double calculateBaseFee(City city, VehicleType vehicleType, LocalDateTime dateTime) {
         BaseFeeRule rule = ruleService.getBaseFeeRuleByCityAndVehicleTypeAndDateTime(city, vehicleType, dateTime);
         return rule.getFee();
     }
+
+    // Calculates the extra fee based on weather observations, vehicle type, and date/time.
     private double calculateExtraFee(WeatherObservation weatherObservation, VehicleType vehicleType, LocalDateTime dateTime) {
         return ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(vehicleType, dateTime)
                 .stream()
@@ -41,6 +56,7 @@ public class DeliveryFeeService {
                 .sum();
     }
 
+    // Applies a specific rule to determine if an extra fee should be added based on weather conditions.
     private double applyRule(ExtraFeeRule rule, WeatherObservation weatherObservation) {
         double fee = rule.getFee();
         switch (rule.getCondition()) {
@@ -60,22 +76,25 @@ public class DeliveryFeeService {
         }
         return 0;
     }
+
+    // Checks if a given value falls within the range specified by an extra fee rule.
     private boolean isValueInRange(Double value, ExtraFeeRule rule) {
         Double min = rule.getMinConditionValue();
         Double max = rule.getMaxConditionValue();
         boolean minInRange = rule.isMinIncludedInRange();
         boolean maxInRange = rule.isMaxIncludedInRange();
 
-        if (min == null && max == null) return true; // ~ min and max are null, so any value is considered within range
-        if (min == null) return maxInRange ? value <= max : value < max; // Only max is provided, check if value is less than or equal to max
-        if (max == null) return minInRange ? value >= min : value > min; // Only min is provided, check if value is greater than or equal to min
+        if (min == null && max == null) return true;
+        if (min == null) return maxInRange ? value <= max : value < max;
+        if (max == null) return minInRange ? value >= min : value > min;
 
-        if(minInRange && maxInRange) return value >= min && value <= max; // Check if value is between min and max
-        if(minInRange) return value >= min && value < max; // Check if value is between min and max
-        if(maxInRange) return value > min && value <= max; // Check if value is between min and max
+        if(minInRange && maxInRange) return value >= min && value <= max;
+        if(minInRange) return value >= min && value < max;
+        if(maxInRange) return value > min && value <= max;
         return  value > min && value < max;
     }
 
+    // Checks if a weather phenomenon matches the condition specified in an extra fee rule.
     private boolean isWeatherPhenomenonMatch(String weatherPhenomenon, Set<String> conditionValues) {
         if(weatherPhenomenon == null) return false;
         String lowerCase = weatherPhenomenon.toLowerCase();
@@ -83,9 +102,11 @@ public class DeliveryFeeService {
         return conditionValues.contains(capitalized);
     }
 
+    // Handles special cases where a fee of -1 indicates that a specific vehicle type is forbidden.
     private double handleFee(double fee){
         if(fee == -1) throw new ForbiddenVehicleTypeException("Usage of selected vehicle type is forbidden");
         return fee;
     }
+
 }
 

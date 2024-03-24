@@ -13,8 +13,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ForbiddenVehicleTypeException.class)
     public ResponseEntity<String> handleForbiddenVehicleType(ForbiddenVehicleTypeException ex){
-
-        System.out.println("forbiddern");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usage of selected vehicle type forbidden");
     }
     @ExceptionHandler(ResourceNotFoundException.class)

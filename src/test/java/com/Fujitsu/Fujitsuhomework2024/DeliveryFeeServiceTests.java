@@ -50,8 +50,8 @@ public class DeliveryFeeServiceTests {
         mockExtraFeeRules();
     }
 
-    @Test
-    public void testCalculateFee_WithValidInput_NoExtraFee() {
+    @Test // Tests the calculation of delivery fee based on base fee rules.
+    public void testCalculateFee_BaseFee() {
         WeatherObservation sampleWeatherObservation = new WeatherObservation();
         sampleWeatherObservation.setAirTemperature(5);
         Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
@@ -65,47 +65,41 @@ public class DeliveryFeeServiceTests {
         assertEquals(2.0, deliveryFeePärnu, 0);
     }
 
-    @Test
-    public void testCalculateFee_WithValidInput_ExtraFee() {
+    @Test // Tests the calculation of delivery fee based on extra fee rules.
+    public void testCalculateFee_ExtraFee() {
         WeatherObservation sampleObservation1 = new WeatherObservation(-15, 0.0, "Light snowfall");
         WeatherObservation sampleObservation2 = new WeatherObservation(-5, 15, "light sleet");
         WeatherObservation sampleObservation3 = new WeatherObservation(2, 5, "LIGHT RAIN");
 
-        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
-                .thenReturn(sampleObservation1);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class))).thenReturn(sampleObservation1);
         double deliveryFee1 = deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, null );
         assertEquals(5, deliveryFee1, 0);
 
-        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
-                .thenReturn(sampleObservation2);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class))).thenReturn(sampleObservation2);
         double deliveryFee2 = deliveryFeeService.calculateDeliveryFee(City.TALLINN, VehicleType.BIKE, null );
         assertEquals(5, deliveryFee2, 0);
 
-        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
-                .thenReturn(sampleObservation3);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class))).thenReturn(sampleObservation3);
         double deliveryFee3 = deliveryFeeService.calculateDeliveryFee(City.PÄRNU, VehicleType.BIKE, null );
         assertEquals(2.5, deliveryFee3, 0);
 
         // Checking that extra rules do not apply to car vehicle type, since there are no extra fee rules for cars.
-        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
-                .thenReturn(sampleObservation1);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class))).thenReturn(sampleObservation1);
         double deliveryFee4 = deliveryFeeService.calculateDeliveryFee(City.PÄRNU, VehicleType.CAR, null );
         assertEquals(3, deliveryFee4, 0);
     }
 
-    @Test
-    public void testCalculateFee_WithValidInput_ExtraFee_Error() {
+    @Test // Tests the calculation of delivery fee with inputs that should result in error based on extra fee rules.
+    public void testCalculateFee_ExtraFee_Error() {
         WeatherObservation sampleObservationHighWind = new WeatherObservation(2, 30, null); // Should throw error for extreme wind
         WeatherObservation sampleObservationExtremeWeatherPhenomenon = new WeatherObservation(5, 15, "Glaze"); // Should throw error for extreme weather phenomenon
 
         // Checking extra fee rules, that should throw predefined error
-        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
-                .thenReturn(sampleObservationHighWind);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class))).thenReturn(sampleObservationHighWind);
         ForbiddenVehicleTypeException exceptionHighWindSpeed = assertThrows(ForbiddenVehicleTypeException.class, () ->
                 deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.BIKE, null));
 
-        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
-                .thenReturn(sampleObservationExtremeWeatherPhenomenon);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class))).thenReturn(sampleObservationExtremeWeatherPhenomenon);
         ForbiddenVehicleTypeException exceptionExtremeWeatherPhenomenon = assertThrows(ForbiddenVehicleTypeException.class, () ->
                 deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, null));
 
@@ -113,7 +107,7 @@ public class DeliveryFeeServiceTests {
         assert exceptionExtremeWeatherPhenomenon.getMessage().contains("Usage of selected vehicle type is forbidden");
     }
 
-    @Test
+    @Test  // Tests the calculation of delivery fee with an invalid input where the date is in the future.
     public void calculateFee_WithInvalidInput_DateInFuture() {
         createEmptySampleObservation();
         LocalDateTime nextWeekDateTime = LocalDateTime.now().plusWeeks(1);// Add one week
@@ -122,7 +116,7 @@ public class DeliveryFeeServiceTests {
         assert exception.getMessage().contains("Date cannot be in the future");
     }
 
-    @Test
+    @Test // Tests the calculation of delivery fee with an invalid input where the city is null.
     public void calculateFee_WithInvalidInput_NullCity() {
         createEmptySampleObservation();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
@@ -130,7 +124,7 @@ public class DeliveryFeeServiceTests {
         assert exception.getMessage().contains("City and vehicle type must not be null");
     }
 
-    @Test
+    @Test // Tests the calculation of delivery fee with an invalid input where the city is null.
     public void calculateFee_WithInvalidInput_NullVehicleType() {
         createEmptySampleObservation();
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
@@ -138,7 +132,7 @@ public class DeliveryFeeServiceTests {
         assert exception.getMessage().contains("City and vehicle type must not be null");
     }
 
-     private void mockBaseFeeRules() {
+    private void mockBaseFeeRules() {
          // Initialize map with city-vehicle combinations and base fee values
          Map<String, Double> baseFeeMap = Map.of(
         "TALLINN_CAR", 4D,
@@ -172,11 +166,8 @@ public class DeliveryFeeServiceTests {
         Set<String> snowAndSleetPhenomenon = Set.of("Light snow shower", "Moderate snow shower", "Heavy snow shower", "Light snowfall", "Moderate snowfall", "Heavy snowfall", "Blowing snow", "Drifting snow", "Light sleet", "Moderate sleet");
         Set<String> rainPhenomenon = Set.of("Light shower", "Moderate shower", "Heavy shower", "Light rain", "Moderate rain", "Heavy rain", "Thunderstorm");
 
-        // Mock extra fee rules
         ExtraFeeRule airTemperature = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "air temperature", null, -10D, false, false, 1);
         ExtraFeeRule airTemperature1 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "air temperature", -10D, 0D, true, true, 0.5);
-
-
 
         ExtraFeeRule windSpeed = new ExtraFeeRule(Set.of(VehicleType.BIKE), "wind speed", 10D, 20D, true, true, 0.5);
         ExtraFeeRule windSpeed1 = new ExtraFeeRule(Set.of(VehicleType.BIKE), "wind speed", 20D, null, false, false, -1);
@@ -189,6 +180,7 @@ public class DeliveryFeeServiceTests {
                 .thenReturn(List.of(airTemperature, airTemperature1, weatherPhenomenon, weatherPhenomenon1, weatherPhenomenon2 ));
         Mockito.lenient().when(ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType.BIKE, null))
                 .thenReturn(List.of(airTemperature,airTemperature1, windSpeed, windSpeed1, weatherPhenomenon, weatherPhenomenon1, weatherPhenomenon2 ));
+        Mockito.lenient().when(ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType.CAR, null)).thenReturn(new ArrayList<>());
     }
 
     private void createEmptySampleObservation(){

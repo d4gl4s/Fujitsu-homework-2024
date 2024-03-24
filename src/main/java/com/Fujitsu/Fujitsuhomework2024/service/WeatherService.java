@@ -24,16 +24,20 @@ import java.util.Set;
 public class WeatherService {
     private final WeatherRepository weatherRepository;
     private final RestTemplate restTemplate;
+    private static final String WEATHER_URL = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php"; // URL for fetching weather data
+    private static final Set<String> OBSERVED_STATIONS = Set.of("Tallinn-Harku", "Tartu-Tõravere", "Pärnu");
+    private static final String CRON_EXPRESSION_DEFAULT = "0 15 * * * *"; // Default cron expression for scheduled weather data import, rund every hour at HH:15
+
+    // Mapping between city and observation station name
     private static final Map<City, String> cityStationMap =  Map.of(
         City.TALLINN, "Tallinn-Harku",
         City.TARTU, "Tartu-Tõravere",
         City.PÄRNU, "Pärnu"
     );
 
-    private static final String WEATHER_URL = "https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php";
-    private static final Set<String> OBSERVED_STATIONS = Set.of("Tallinn-Harku", "Tartu-Tõravere", "Pärnu");
-    private static final String CRON_EXPRESSION_DEFAULT = "0 15 * * * *"; // Runs every hour at HH:15:00
-
+    /**
+     * Scheduled method to import weather data from the external API.
+     */
     @Scheduled(cron = CRON_EXPRESSION_DEFAULT) // Runs every hour at HH:15:00 by default
     public void importWeatherData() {
         try {
@@ -44,20 +48,24 @@ public class WeatherService {
         }
     }
 
+
+    // Parses the XML weather data and inserts it into the database.
     private void parseAndInsertWeatherData(String xmlData) throws IOException {
         XmlMapper xmlMapper = new XmlMapper();
-        Observations weatherList = xmlMapper.readValue(xmlData, Observations.class);
-        for (WeatherObservation weatherObservation : weatherList.getStations()) {
-            if(OBSERVED_STATIONS.contains(weatherObservation.getStationName())) saveWeatherData(weatherObservation, weatherList.getTimestamp());}
+        Observations weatherList = xmlMapper.readValue(xmlData, Observations.class); // Map xml data to Java classes
+        for (WeatherObservation weatherObservation : weatherList.getStations()) { // Save observation data for relevant stations
+            if(OBSERVED_STATIONS.contains(weatherObservation.getStationName())) saveWeatherData(weatherObservation, weatherList.getTimestamp());
+        }
     }
 
-
+    // Saves weather data into the database.
     private void saveWeatherData(WeatherObservation weatherObservation, long timestampUnix) {
         LocalDateTime timestamp = UnixTimeToLocalDateTimeConverter.convertUnixTimestamp(timestampUnix);
         weatherObservation.setTimestamp(timestamp);
         weatherRepository.save(weatherObservation);
     }
 
+    // Retrieves weather observation for a specific city at a given date and time.
     public WeatherObservation getWeatherAtDateTimeAtCity(LocalDateTime dateTime, City city) {
         Optional<WeatherObservation> observation;
 
@@ -68,4 +76,5 @@ public class WeatherService {
 
         return observation.orElseThrow(() -> new ResourceNotFoundException("Weather not found for given station"));
     }
+
 }

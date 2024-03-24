@@ -41,14 +41,23 @@ public class WeatherObservation {
     @Column(name = "weather_phenomenon")
     private String weatherPhenomenon;
 
+    @Column(name = "timestamp")
+    private LocalDateTime timestamp;
+
+
+    /**
+     * Constructs a {@code WeatherObservation} object with the specified parameters. Useful for testing, since only assigns fields that are related to business logic.
+     *
+     * @param airTemperature   The air temperature recorded in the weather observation.
+     * @param windSpeed        The wind speed recorded in the weather observation.
+     * @param weatherPhenomenon The type of weather phenomenon observed (e.g., rain, snow, etc.).
+     */
     public WeatherObservation(double airTemperature, double windSpeed, String weatherPhenomenon) {
         this.airTemperature = airTemperature;
         this.windSpeed = windSpeed;
         this.weatherPhenomenon = weatherPhenomenon;
     }
 
-    @Column(name = "timestamp")
-    private LocalDateTime timestamp;
 }
 
 
