@@ -40,6 +40,9 @@ public class Application {
 			new BaseFeeRule(City.PÄRNU, VehicleType.BIKE, 2)
 		));
 
+		Set<String> snowAndSleetPhenomenon = Set.of("Light snow shower", "Moderate snow shower", "Heavy snow shower", "Light snowfall", "Moderate snowfall", "Heavy snowfall", "Blowing snow", "Drifting snow", "Light sleet", "Moderate sleet");
+		Set<String> rainPhenomenon = Set.of("Light shower", "Moderate shower", "Heavy shower", "Light rain", "Moderate rain", "Heavy rain", "Thunderstorm");
+
 		// Create and save rules for ATEF
         extraFeeRuleRepository.saveAll(Arrays.asList(
 			new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE),"air temperature", null, -10D,false,false, 1),
@@ -54,9 +57,9 @@ public class Application {
 
         // Create and save rules for WPEF
         extraFeeRuleRepository.saveAll(Arrays.asList(
-            new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("snow", "sleet"), 1),
-			new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("rain"), 0.5),
-			new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("glaze", "hail", "thunder"), -1)
+            new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", snowAndSleetPhenomenon, 1),
+			new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", rainPhenomenon, 0.5),
+			new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("Glaze", "Hail", "Thunder"), -1)
         ));
 
 		weatherService.importWeatherData();

@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import com.Fujitsu.Fujitsuhomework2024.enums.City;
-import com.Fujitsu.Fujitsuhomework2024.exception.WeatherObservationNotFoundException;
 import com.Fujitsu.Fujitsuhomework2024.model.Observations;
 import com.Fujitsu.Fujitsuhomework2024.model.WeatherObservation;
 import com.Fujitsu.Fujitsuhomework2024.repository.WeatherRepository;

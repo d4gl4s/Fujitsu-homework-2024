@@ -41,6 +41,12 @@ public class WeatherObservation {
     @Column(name = "weather_phenomenon")
     private String weatherPhenomenon;
 
+    public WeatherObservation(double airTemperature, double windSpeed, String weatherPhenomenon) {
+        this.airTemperature = airTemperature;
+        this.windSpeed = windSpeed;
+        this.weatherPhenomenon = weatherPhenomenon;
+    }
+
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
 }

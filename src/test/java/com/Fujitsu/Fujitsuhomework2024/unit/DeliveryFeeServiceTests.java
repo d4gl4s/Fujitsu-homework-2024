@@ -2,6 +2,7 @@ package com.Fujitsu.Fujitsuhomework2024.unit;
 
 import com.Fujitsu.Fujitsuhomework2024.enums.City;
 import com.Fujitsu.Fujitsuhomework2024.enums.VehicleType;
+import com.Fujitsu.Fujitsuhomework2024.exception.ForbiddenVehicleTypeException;
 import com.Fujitsu.Fujitsuhomework2024.model.BaseFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.ExtraFeeRule;
 import com.Fujitsu.Fujitsuhomework2024.model.WeatherObservation;
@@ -20,9 +21,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -38,42 +42,112 @@ public class DeliveryFeeServiceTests {
     @InjectMocks
     @Autowired
     private DeliveryFeeService deliveryFeeService;
-    private WeatherObservation sampleWeatherObservation;
-    private final LocalDateTime localDateTime = LocalDateTime.now();
 
     @Before
     public void setUp(){
-        // Mock base fee rules
+        // Mock rules
         mockBaseFeeRules();
-        //mockExtraFeeRules();
+        mockExtraFeeRules();
     }
 
     @Test
-    public void testCalculateDeliveryFee_WithValidInput_ReturnsCorrectFee() {
-        sampleWeatherObservation = new WeatherObservation(1L, "", "",10 , 5, "snow", LocalDateTime.now());
-        // Mock behavior of weatherService and ruleService
+    public void testCalculateFee_WithValidInputAndNoExtraFee() {
+        WeatherObservation sampleWeatherObservation = new WeatherObservation();
+        sampleWeatherObservation.setAirTemperature(5);
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleWeatherObservation);
+        // 1-way testing for inputs
+        double deliveryFeeTartu = deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, null );
+        double deliveryFeeTallinn = deliveryFeeService.calculateDeliveryFee(City.TALLINN, VehicleType.CAR, null );
+        double deliveryFeePärnu = deliveryFeeService.calculateDeliveryFee(City.PÄRNU, VehicleType.BIKE, null );
+        assertEquals(3.0, deliveryFeeTartu, 0);
+        assertEquals(4.0, deliveryFeeTallinn, 0);
+        assertEquals(2.0, deliveryFeePärnu, 0);
+    }
+
+    @Test
+    public void testCalculateFee_WithValidInputAndExtraFee() {
+        WeatherObservation sampleObservation1 = new WeatherObservation(-15, 0.0, "Light snowfall");
+        WeatherObservation sampleObservation2 = new WeatherObservation(-5, 15, "light sleet");
+        WeatherObservation sampleObservation3 = new WeatherObservation(2, 5, "LIGHT RAIN");
+        WeatherObservation sampleObservation4 = new WeatherObservation(2, 30, null); // Should throw error
+        WeatherObservation sampleObservation5 = new WeatherObservation(5, 15, "Glaze"); // Should throw error
+
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleObservation1);
+        double deliveryFee1 = deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, null );
+        assertEquals(5, deliveryFee1, 0);
+
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleObservation2);
+        double deliveryFee2 = deliveryFeeService.calculateDeliveryFee(City.TALLINN, VehicleType.BIKE, null );
+        assertEquals(5, deliveryFee2, 0);
+
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleObservation3);
+        double deliveryFee3 = deliveryFeeService.calculateDeliveryFee(City.PÄRNU, VehicleType.BIKE, null );
+        assertEquals(2.5, deliveryFee3, 0);
+
+        // Checking that extra rules do not apply to car vehicle type, since there are no extra fee rules for cars.
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleObservation1);
+        double deliveryFee4 = deliveryFeeService.calculateDeliveryFee(City.PÄRNU, VehicleType.CAR, null );
+        assertEquals(3, deliveryFee4, 0);
+
+        // Checking extra fee rules, that should throw predefined error
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleObservation4);
+        ForbiddenVehicleTypeException exceptionHighWindSpeed = assertThrows(ForbiddenVehicleTypeException.class, () -> {
+            deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.BIKE, null);
+        });
+
+        Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(any(), Mockito.any(City.class)))
+                .thenReturn(sampleObservation5);
+        ForbiddenVehicleTypeException exceptionExtremeWeatherPhenomenon = assertThrows(ForbiddenVehicleTypeException.class, () -> {
+            deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, null);
+        });
+
+        assert exceptionHighWindSpeed.getMessage().contains("Usage of selected vehicle type is forbidden");
+        assert exceptionExtremeWeatherPhenomenon.getMessage().contains("Usage of selected vehicle type is forbidden");
+    }
+
+    @Test
+    public void testCalculateFee_WithInvalidInputs() {
+        WeatherObservation sampleWeatherObservation = new WeatherObservation(1L, "", "",10 , 5, "snow", LocalDateTime.now());
         Mockito.lenient().when(weatherService.getWeatherAtDateTimeAtCity(Mockito.any(LocalDateTime.class), Mockito.any(City.class)))
                 .thenReturn(sampleWeatherObservation);
 
+        LocalDateTime nextWeekDateTime = LocalDateTime.now().plusWeeks(1);// Add one week
+        IllegalArgumentException exceptionDateInFuture = assertThrows(IllegalArgumentException.class, () -> {
+            deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, nextWeekDateTime);
+        });
 
-        // Call the method under test
-        double deliveryFee = deliveryFeeService.calculateDeliveryFee(City.TARTU, VehicleType.SCOOTER, null );
-        // Assert the result
-        assertEquals(3.0, deliveryFee, 0);
+        IllegalArgumentException exceptionCityNull = assertThrows(IllegalArgumentException.class, () -> {
+            deliveryFeeService.calculateDeliveryFee(null, VehicleType.SCOOTER, nextWeekDateTime);
+        });
+
+        IllegalArgumentException exceptionVechileNull = assertThrows(IllegalArgumentException.class, () -> {
+            deliveryFeeService.calculateDeliveryFee(City.TARTU,null, nextWeekDateTime);
+        });
+
+        assert exceptionDateInFuture.getMessage().contains("Date cannot be in the future");
+        assert exceptionCityNull.getMessage().contains("City and vehicle type must not be null");
+        assert exceptionVechileNull.getMessage().contains("City and vehicle type must not be null");
+
     }
 
      private void mockBaseFeeRules() {
          // Initialize map with city-vehicle combinations and base fee values
-         Map<String, Integer> baseFeeMap = Map.of(
-        "TALLINN_CAR", 3,
-        "TALLINN_SCOOTER", 3,
-        "TALLINN_BIKE", 3,
-        "TARTU_CAR", 3,
-        "TARTU_SCOOTER", 3,
-        "TARTU_BIKE", 3,
-        "PÄRNU_CAR", 3,
-        "PÄRNU_SCOOTER", 3,
-        "PÄRNU_BIKE", 3
+         Map<String, Double> baseFeeMap = Map.of(
+        "TALLINN_CAR", 4D,
+        "TALLINN_SCOOTER", 3.5,
+        "TALLINN_BIKE", 3D,
+        "TARTU_CAR", 3.5,
+        "TARTU_SCOOTER", 3D,
+        "TARTU_BIKE", 2.5,
+        "PÄRNU_CAR", 3D,
+        "PÄRNU_SCOOTER", 2.5,
+        "PÄRNU_BIKE", 2D
         );
 
         // Mock the behavior of ruleService.getBaseFeeRuleByCityAndVehicleTypeAndDateTime()
@@ -82,7 +156,6 @@ public class DeliveryFeeServiceTests {
                 .thenReturn(new BaseFeeRule(getCityFromKey(key), getVehicleTypeFromKey(key), value))
         );
     }
-
 
     // Utility methods to extract city and vehicle type from the key
     private City getCityFromKey(String key) {
@@ -94,18 +167,21 @@ public class DeliveryFeeServiceTests {
     }
 
     private void mockExtraFeeRules(){
+        Set<String> snowAndSleetPhenomenon = Set.of("Light snow shower", "Moderate snow shower", "Heavy snow shower", "Light snowfall", "Moderate snowfall", "Heavy snowfall", "Blowing snow", "Drifting snow", "Light sleet", "Moderate sleet");
+        Set<String> rainPhenomenon = Set.of("Light shower", "Moderate shower", "Heavy shower", "Light rain", "Moderate rain", "Heavy rain", "Thunderstorm");
 
         // Mock extra fee rules
         ExtraFeeRule airTemperature = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "air temperature", null, -10D, false, false, 1);
-        ExtraFeeRule airTemperature1 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "air temperature", -10D, 0D, true, true, 25);
+        ExtraFeeRule airTemperature1 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "air temperature", -10D, 0D, true, true, 0.5);
 
 
-        ExtraFeeRule windSpeed = new ExtraFeeRule(Set.of(VehicleType.BIKE), "wind speed", 10D, 20D, true, true, 5);
+
+        ExtraFeeRule windSpeed = new ExtraFeeRule(Set.of(VehicleType.BIKE), "wind speed", 10D, 20D, true, true, 0.5);
         ExtraFeeRule windSpeed1 = new ExtraFeeRule(Set.of(VehicleType.BIKE), "wind speed", 20D, null, false, false, -1);
 
-        ExtraFeeRule weatherPhenomenon = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("snow", "sleet"), 1);
-        ExtraFeeRule weatherPhenomenon1 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("rain"), 65);
-        ExtraFeeRule weatherPhenomenon2 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("glaze", "hail", "thunder"), -1);
+        ExtraFeeRule weatherPhenomenon = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon",snowAndSleetPhenomenon, 1);
+        ExtraFeeRule weatherPhenomenon1 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", rainPhenomenon, 0.5);
+        ExtraFeeRule weatherPhenomenon2 = new ExtraFeeRule(Set.of(VehicleType.SCOOTER, VehicleType.BIKE), "weather phenomenon", Set.of("Glaze", "Hail", "Thunder"), -1);
 
         Mockito.lenient().when(ruleService.findExtraFeeRulesByVehicleTypeAndDateTime(VehicleType.SCOOTER, null))
                 .thenReturn(List.of(airTemperature, airTemperature1, weatherPhenomenon, weatherPhenomenon1, weatherPhenomenon2 ));

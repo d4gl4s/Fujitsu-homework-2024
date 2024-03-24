@@ -60,7 +60,6 @@ public class DeliveryFeeService {
         }
         return 0;
     }
-
     private boolean isValueInRange(Double value, ExtraFeeRule rule) {
         Double min = rule.getMinConditionValue();
         Double max = rule.getMaxConditionValue();
@@ -78,11 +77,14 @@ public class DeliveryFeeService {
     }
 
     private boolean isWeatherPhenomenonMatch(String weatherPhenomenon, Set<String> conditionValues) {
-        return conditionValues.contains(weatherPhenomenon.toLowerCase());
+        if(weatherPhenomenon == null) return false;
+        String lowerCase = weatherPhenomenon.toLowerCase();
+        String capitalized = lowerCase.substring(0, 1).toUpperCase() + lowerCase.substring(1);
+        return conditionValues.contains(capitalized);
     }
 
     private double handleFee(double fee){
-        if(fee == -1) throw new ForbiddenVehicleTypeException();
+        if(fee == -1) throw new ForbiddenVehicleTypeException("Usage of selected vehicle type is forbidden");
         return fee;
     }
 }

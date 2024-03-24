@@ -11,10 +11,18 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ForbiddenVehicleTypeException.class)
+    public ResponseEntity<String> handleForbiddenVehicleType(ForbiddenVehicleTypeException ex){
+
+        System.out.println("forbiddern");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usage of selected vehicle type forbidden");
+    }
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
+
+    // Exeptions for API parameter type mismatches
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<String> handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
@@ -37,7 +45,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception ex) {
-        ex.printStackTrace();  // Log the exception for debugging purposes
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
     }
 }

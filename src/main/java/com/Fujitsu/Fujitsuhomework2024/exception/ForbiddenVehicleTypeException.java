@@ -1,10 +1,13 @@
 package com.Fujitsu.Fujitsuhomework2024.exception;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class ForbiddenVehicleTypeException extends RuntimeException{
-    public ForbiddenVehicleTypeException() {
-        super("Usage of selected vehicle type is forbidden");
-    }
-    public ForbiddenVehicleTypeException(String message) {
-        super(message);
+    private final String message;
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }
