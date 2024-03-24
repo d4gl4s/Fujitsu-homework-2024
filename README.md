@@ -1,6 +1,6 @@
 # Fujitsu 2024: Food Delivery Fee Calculator
 
-This application is a sub-functionality of a food delivery application that calculates the delivery fee for food couriers based on regional base fee, vehicle type, and weather conditions.
+This application is a sub-functionality of a food delivery application that calculates the delivery fee for food couriers based on regional base fee, vehicle type, and weather conditions. Find the instructions of how to set up the project down below.
 
 ## Core Modules
 
@@ -26,14 +26,14 @@ This application is a sub-functionality of a food delivery application that calc
 
 ### Retrieve All Base Fee Rules
 
-- **URL:** `/api/baseFeeRules`
+- **URL:** `/api/base-fees`
 - **Method:** `GET`
 - **Description:** Retrieves all base fee rules.
 - **Returns:** A list of `BaseFeeRule` objects.
 
 ### Create Base Fee Rule
 
-- **URL:** `/api/baseFeeRules`
+- **URL:** `/api/base-fees`
 - **Method:** `POST`
 - **Parameters:**
   - `baseFeeRule` (RequestBody): The base fee rule to be created.
@@ -42,7 +42,7 @@ This application is a sub-functionality of a food delivery application that calc
 
 ### Retrieve Base Fee Rule by ID
 
-- **URL:** `/api/baseFeeRules/{id}`
+- **URL:** `/api/base-fees/{id}`
 - **Method:** `GET`
 - **Parameters:**
   - `id` (PathVariable): The ID of the base fee rule to retrieve.
@@ -51,35 +51,34 @@ This application is a sub-functionality of a food delivery application that calc
 
 ### Update Base Fee Rule
 
-- **URL:** `/api/baseFeeRules/{id}`
+- **URL:** `/api/base-fees/{id}`
 - **Method:** `PUT`
 - **Parameters:**
   - `id` (PathVariable): The ID of the base fee rule to update.
   - `baseFeeRule` (RequestBody): The updated base fee rule.
-- **Description:** Updates an existing base fee rule.
+- **Description:** Updates an existing base fee rule. Keeps original rule for queries that need rules that were applied at some time period. Creates a new updated rule.
 - **Returns:** The updated `BaseFeeRule` object.
 
 ### Delete Base Fee Rule
 
-- **URL:** `/api/baseFeeRules/{id}`
+- **URL:** `/api/base-fees/{id}`
 - **Method:** `DELETE`
 - **Parameters:**
   - `id` (PathVariable): The ID of the base fee rule to delete.
-- **Description:** Deletes a base fee rule by its ID.
-- **Returns:** An indication of the success or failure of the operation.
+- **Description:** Deletes a base fee rule by its ID. Keeps original in database but adds a endDate value to it, to specify that rule does not apply anymore. Keeping old rules is necessary to query rules for fee calculations at previous dateTimes.
 
 ## Extra Fee Rule API
 
 ### Retrieve All Extra Fee Rules
 
-- **URL:** `/api/extraFeeRules`
+- **URL:** `/api/extra-fees`
 - **Method:** `GET`
 - **Description:** Retrieves all extra fee rules.
 - **Returns:** A list of `ExtraFeeRule` objects.
 
 ### Create Extra Fee Rule
 
-- **URL:** `/api/extraFeeRules`
+- **URL:** `/api/extra-fees`
 - **Method:** `POST`
 - **Parameters:**
   - `extraFeeRule` (RequestBody): The extra fee rule to be created.
@@ -88,7 +87,7 @@ This application is a sub-functionality of a food delivery application that calc
 
 ### Retrieve Extra Fee Rule by ID
 
-- **URL:** `/api/extraFeeRules/{id}`
+- **URL:** `/api/extra-fees/{id}`
 - **Method:** `GET`
 - **Parameters:**
   - `id` (PathVariable): The ID of the extra fee rule to retrieve.
@@ -97,21 +96,46 @@ This application is a sub-functionality of a food delivery application that calc
 
 ### Update Extra Fee Rule
 
-- **URL:** `/api/extraFeeRules/{id}`
+- **URL:** `/api/extra-fees/{id}`
 - **Method:** `PUT`
 - **Parameters:**
   - `id` (PathVariable): The ID of the extra fee rule to update.
   - `extraFeeRule` (RequestBody): The updated extra fee rule.
-- **Description:** Updates an existing extra fee rule.
+- **Description:** Updates an existing extra fee rule. Keeps original rule for queries that need rules that were applied at some time period. Creates a new updated rule.
 - **Returns:** The updated `ExtraFeeRule` object.
 
 ### Delete Extra Fee Rule
 
-- **URL:** `/api/extraFeeRules/{id}`
+- **URL:** `/api/extra-fees/{id}`
 - **Method:** `DELETE`
 - **Parameters:**
   - `id` (PathVariable): The ID of the extra fee rule to delete.
-- **Description:** Deletes an extra fee rule by its ID.
-- **Returns:** An indication of the success or failure of the operation.
+- **Description:** Deletes an extra fee rule by its ID. Keeps original in database but adds a endDate value to it, to specify that rule does not apply anymore. Keeping old rules is necessary to query rules for fee calculations at previous dateTimes.
+## Setting Up the Project ✨
+
+1. **Cloning the Repository:**
+   - Clone the repository to your local machine using Git:
+     ```
+     git clone https://github.com/d4gl4s/Fujitsu-homework-2024.git
+     ```
+
+2. **Database Configuration:**
+   - The application uses an H2 in-memory database.
+   - The JDBC URL is (`jdbc:h2:mem:test`), the username is (`su`), and the password is empty.
+
+3. **Running the Application:**
+   - Once configured, run the Spring Boot application using your IDE or command line.
+
+4. **Accessing the H2 Console:**
+   - After running the application, access the H2 console to manage the database.
+   - Open a web browser and go to `http://localhost:8080/h2-console`.
+   - Enter the JDBC URL (`jdbc:h2:mem:test`), username (`su`), and leave the password field blank, then click Connect.
+
+5. **Configuring CronJob Options:**
+   - Adjust the CronJob schedule for importing weather data in `WeatherService.java` as needed.
+
+6. **Testing API Endpoints:**
+   - Use tools like Postman to test the provided API endpoints.
+   - Refer to the README for details on API endpoints and their usage.
 
 
